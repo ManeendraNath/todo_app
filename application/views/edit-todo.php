@@ -1,26 +1,26 @@
 <div class="row">
-    <div class="col-md-4 col-md-offset-4">
-        <h2 class="text-center">Update User <span class="pull-right"><a href="<?php echo base_url(); ?>">View All Employee</a></span></h3></h2>
+    <div class="col-md-6 col-md-offset-3">
+        <h2 class="text-center">Update Todo <span class="pull-right"><a href="<?php echo base_url(); ?>">View Todo List</a></span></h3></h2>
         <div class="message"></div>
-        <form method="post" action="" class="form-horizontal" name="updateUser">
-            <input type="hidden" name="data_action" value="update_user" />
-            <input type="hidden" name="user_id" value="<?php echo $_GET['user_id']; ?>" />
+        <form method="put" action="" class="form-horizontal" name="updateTodo">
+            <input type="hidden" name="data_action" value="update_todo" />
+            <input type="hidden" name="todo_id" value="<?php echo $_GET['todo_id']; ?>" />
             <div class="form-group">
-                <label class="control-label col-sm-3">First Name</label>
+                <label class="control-label col-sm-3">Name</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="first_name" value="" />
+                    <input type="text" class="form-control" name="name" value="" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-3">Last Name</label>
+                <label class="control-label col-sm-3">Short Description</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="last_name" value="" />
+                    <input type="text" class="form-control" name="short_desc" value="" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-3">Email</label>
+                <label class="control-label col-sm-3">Long Description</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="email" value="" />
+                    <input type="text" class="form-control" name="long_desc" value="" />
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Update Details</button>
@@ -29,11 +29,11 @@
 </div>
 
 <script>
-function getUserDetail(user_id) {
+function getTodoDetail(todo_id) {
 	$.ajax({
-		method: "POST",
+		method: "GET",
 		url : "<?=base_url()?>api/action",
-		data: {data_action:'get_user_detail', user_id: user_id},
+		data: {data_action:'get_todo_detail', todo_id: todo_id},
 		dataType:'json',
 		success: function(data){
 			if(data.is_error == "yes") {
@@ -41,9 +41,9 @@ function getUserDetail(user_id) {
 				$('.message').html("Something went wrong. Please try again later.");
 			} else {
 				var result = (data.data);
-                $("input[name='first_name']").val(result.first_name);
-                $("input[name='last_name']").val(result.last_name);
-                $("input[name='email']").val(result.email);
+                $("input[name='name']").val(result.name);
+                $("input[name='short_desc']").val(result.short_desc);
+                $("input[name='long_desc']").val(result.long_desc);
             }
 		},
 		error: function() {
@@ -53,17 +53,17 @@ function getUserDetail(user_id) {
 }
 
 $(document).ready(function(){
-	getUserDetail("<?php echo $_GET['user_id']; ?>");
+	getTodoDetail("<?php echo $_GET['todo_id']; ?>");
 });
 
-$(document).on("submit", "form[name='updateUser']", function(e){
+$(document).on("submit", "form[name='updateTodo']", function(e){
 	e.preventDefault();
 	var data=$(this).serialize();
 	$.ajax({
 		method: "POST",
 		url : "<?=base_url()?>api/action",
 		data: data,
-		dataType:'json',
+		dataType:'text',
 		success: function(data){
 			console.log(data);
 			if(data.is_error == "yes") {
@@ -75,8 +75,8 @@ $(document).on("submit", "form[name='updateUser']", function(e){
 				$('.message').html("Record updated successfully.");
 			}
 		},
-		error: function() {
-			alert("Some Error occured. Please try again after some time."); 
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+ 			console.log(errorThrown);
 		}
 	});
 	return false;

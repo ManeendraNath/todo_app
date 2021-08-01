@@ -31,16 +31,11 @@ class Api extends CI_Controller {
 			echo json_encode($response);
 			exit;
 		}
-		/*
-		 * if requrest method is not POST
-		 */
-		if($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			$response["is_error"] = "yes";
-			$response['error'] = 'Wrong Request Method!';
-			echo json_encode($response);
-			exit;
-		}
+if($this->input->server('REQUEST_METHOD') === "GET") {
+		$action = $this->input->get('data_action');
+} else {
 		$action = $this->input->post('data_action');
+}
 		/*
 		 * if valid data_action is not available.
 		 */
@@ -52,10 +47,25 @@ class Api extends CI_Controller {
 		} 
 
 		/*
-		 * get all employees details
+		 * get all todo details
 		 */
 		if($action == "fetch_data") {
-			$data = $this->api_model->fetchAll();
+			$isRequestMethodValid = $this->validateRequestMethod('GET');
+			/*
+			 * if requrest method is not GET
+			 */
+			if($this->input->get('status') == "") {
+				$status = NULL;
+			} else {
+				$status = (int)$this->input->get('status');
+			}
+			if($isRequestMethodValid == 'no') {
+				$response["is_error"] = "yes";
+				$response['error'] = 'Wrong Request Method!';
+				echo json_encode($response);
+				exit;
+			}
+			$data = $this->api_model->fetchAll($status);
 			$response["is_error"] = "no";
 			$response["data"] = $data->result_array();
 			echo json_encode($response);
@@ -64,36 +74,43 @@ class Api extends CI_Controller {
 		}
 		
 		/*
-		 * add new employee
+		 * add new todo
 		 */
-		if($action == "add_user") {
+		if($action == "add_todo") {
+
+			$isRequestMethodValid = $this->validateRequestMethod('POST');
+			/*
+			 * if requrest method is not POST
+			 */
+			if($isRequestMethodValid == 'no') {
+				$response["is_error"] = "yes";
+				$response['error'] = 'Wrong Request Method!';
+				echo json_encode($response);
+				exit;
+			}
+
 			$error = 0;
-			if($this->input->post('first_name') == "") {
+			if($this->input->post('name') == "") {
 				$error = 1;
-				$errorArray["first_name_error"] = "First name required";
+				$errorArray["name_error"] = "Name required";
 			}
-			if($this->input->post('last_name') == "") {
+			if($this->input->post('short_desc') == "") {
 				$error = 1;
-				$errorArray["last_name_error"] = "Last name required";
+				$errorArray["short_desc_error"] = "Short Description required";
 			}
-			if($this->input->post('email') == "") {
+			if($this->input->post('long_desc') == "") {
 				$error = 1;
-				$errorArray["email_error"] = "Email required";
+				$errorArray["long_desc_error"] = "Long Description required";
 			}
 
 			if($error == 1) {
 				$response['is_error'] = 'yes';
 				$response['error'] = $errorArray;
 			} else {
-				$formData['first_name'] = strtolower($this->input->post('first_name'));
-				$formData['last_name'] = strtolower($this->input->post('last_name'));
-				$formData['email'] = strtolower($this->input->post('email'));
-				$formData['status'] = 1;
-				$employee_id = $this->api_model->addUser($formData);
-
-				$transactionData['employee_id'] = $employee_id;
-				$transactionData['transaction_details'] ="New employee added.";
-				$this->api_model->addTransaction($transactionData);
+				$formData['name'] = strtolower($this->input->post('name'));
+				$formData['short_desc'] = strtolower($this->input->post('short_desc'));
+				$formData['long_desc'] = strtolower($this->input->post('long_desc'));
+				$this->api_model->addTodo($formData);
 
 				$response['is_error'] = 'no';
 			}
@@ -102,11 +119,22 @@ class Api extends CI_Controller {
 		}
 		
 		/*
-		 * get employee details for edit and delete
+		 * get todo details for edit and delete
 		 */
-		if($action == "get_user_detail") {
-			$user_id = $this->input->post('user_id');
-			$data = $this->api_model->getUserById($user_id);
+		if($action == "get_todo_detail") {
+
+			$isRequestMethodValid = $this->validateRequestMethod('GET');
+			/*
+			 * if requrest method is not GET
+			 */
+			if($isRequestMethodValid == 'no') {
+				$response["is_error"] = "yes";
+				$response['error'] = 'Wrong Request Method!';
+				echo json_encode($response);
+				exit;
+			}
+			$todo_id = $this->input->get('todo_id');
+			$data = $this->api_model->getTodoById($todo_id);
 			$response["is_error"] = "no";
 			$response["data"] = $data;
 			echo json_encode($response);
@@ -114,41 +142,47 @@ class Api extends CI_Controller {
 		}
 		
 		/*
-		 * update employee details
+		 * update todo details
 		 */
-		if($action == "update_user") {
+		if($action == "update_todo") {
+
+			$isRequestMethodValid = $this->validateRequestMethod('POST');
+			/*
+			 * if requrest method is not POST
+			 */
+			if($isRequestMethodValid == 'no') {
+				$response["is_error"] = "yes";
+				$response['error'] = 'Wrong Request Method!';
+				echo json_encode($response);
+				exit;
+			}
 			$error = 0;
-			if((int)$this->input->post('user_id') == 0) {
+			if((int)$this->input->post('todo_id') == 0) {
 				$error = 1;
-				$errorArray["user_id_error"] = "user id required";
+				$errorArray["todo_id_error"] = "todo id required";
 			}
-			if($this->input->post('first_name') == "") {
+			if($this->input->post('name') == "") {
 				$error = 1;
-				$errorArray["first_name_error"] = "First name required";
+				$errorArray["name_error"] = "Name required";
 			}
-			if($this->input->post('last_name') == "") {
+			if($this->input->post('short_desc') == "") {
 				$error = 1;
-				$errorArray["last_name_error"] = "Last name required";
+				$errorArray["short_desc_error"] = "Short Description required";
 			}
-			if($this->input->post('email') == "") {
+			if($this->input->post('long_desc') == "") {
 				$error = 1;
-				$errorArray["email_error"] = "Email required";
+				$errorArray["long_desc_error"] = "Long Description required";
 			}
 
 			if($error == 1) {
 				$response['is_error'] = 'yes';
 				$response['error'] = $errorArray;
 			} else {
-				$formData['id'] = $this->input->post('user_id');
-				$formData['first_name'] = strtolower($this->input->post('first_name'));
-				$formData['last_name'] = strtolower($this->input->post('last_name'));
-				$formData['email'] = strtolower($this->input->post('email'));
-				$formData['status'] = 1;
-				$this->api_model->updateUser($formData);
-
-				$transactionData['employee_id'] = $formData['id'];
-				$transactionData['transaction_details'] ="Employee details updated.";
-				$this->api_model->addTransaction($transactionData);
+				$formData['id'] = $this->input->post('todo_id');
+				$formData['name'] = strtolower($this->input->post('name'));
+				$formData['short_desc'] = strtolower($this->input->post('short_desc'));
+				$formData['long_desc'] = strtolower($this->input->post('long_desc'));
+				$this->api_model->updateTodo($formData);
 
 				$response['is_error'] = 'no';
 			}
@@ -157,26 +191,78 @@ class Api extends CI_Controller {
 		}
 		
 		/*
-		 * delete employee (for this we will change the employee status 2 so that data will not be lost)
-		 */ 
-		if($action == "delete_user") {
+		 * mark complete todo
+		 */
+		if($action == "complete_todo") {
 			
-			if((int)$this->input->post('user_id') == 0) {
+			$isRequestMethodValid = $this->validateRequestMethod('POST');
+			/*
+			 * if requrest method is not POST
+			 */
+			if($isRequestMethodValid == 'no') {
+				$response["is_error"] = "yes";
+				$response['error'] = 'Wrong Request Method!';
+				echo json_encode($response);
+				exit;
+			}
+			$error = 0;
+			if((int)$this->input->post('todo_id') == 0) {
+				$error = 1;
+				$errorArray["todo_id_error"] = "todo id required";
+			}
+			if($error == 1) {
 				$response['is_error'] = 'yes';
-				$response['error'] = 'data validation failed';
+				$response['error'] = $errorArray;
 			} else {
-				$formData['id'] = $this->input->post('user_id');
-				$formData['status'] = 2;
-				$this->api_model->deleteUser($formData);
+				$todo_id = $this->input->post('todo_id');
+				$this->api_model->completeTodo($todo_id);
 
-				$transactionData['employee_id'] = $formData['id'];
-				$transactionData['transaction_details'] ="Employee deleted.";
-				$this->api_model->addTransaction($transactionData);
+				$response['is_error'] = 'no';
+			}
+			echo json_encode($response);
+			exit;
+		}
+		
+		/*
+		 * delete todo (for this we will change the todo status 2 so that data will not be lost)
+		 */ 
+		if($action == "delete_todo") {
+
+			$isRequestMethodValid = $this->validateRequestMethod('POST');
+			/*
+			 * if requrest method is not POST
+			 */
+			if($isRequestMethodValid == 'no') {
+				$response["is_error"] = "yes";
+				$response['error'] = 'Wrong Request Method!';
+				echo json_encode($response);
+				exit;
+			}
+			
+			$error = 0;
+			if((int)$this->input->post('todo_id') == 0) {
+				$error = 1;
+				$errorArray["todo_id_error"] = "todo id required";
+			}
+			if($error == 1) {
+				$response['is_error'] = 'yes';
+				$response['error'] = $errorArray;
+			} else {
+				$todo_id = $this->input->post('todo_id');
+				$this->api_model->deleteTodo($todo_id);
 				
 				$response['is_error'] = 'no';
 			}
 			echo json_encode($response);
 			exit;
+		}
+	}
+
+	private function validateRequestMethod($requiredRequiredMethod) {
+		if($this->input->server('REQUEST_METHOD') !== $requiredRequiredMethod) {
+			return 'no';
+		} else {
+			return 'yes';
 		}
 	}
 }

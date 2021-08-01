@@ -2,16 +2,28 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <div class="container">
-	<h3>View Employees Details <span class="pull-right"><a href="<?php echo base_url(); ?>new-user">Add New Employee</a></span></h3>
+	<h3>Todo List <span class="pull-right"><a href="<?php echo base_url(); ?>new-todo">Add New Todo</a></span></h3>
 	<div class="message"></div>
+	<form class="form-inline">
+		<div class="form-group">
+			<label>Status</label>
+			<select name="status" class="form-control">
+				<option value="">All</option>
+				<option value="1">In Progress</option>
+				<option value="2">Completed</option>
+			</select>
+		</div>
+	</form>
 	<table class="table">
 		<thead>
 			<tr>
 				<th>#</th>
-				<th>First Name</th>
-				<th>Last Name</th>
-				<th>Email</th>
+				<th>Name</th>
+				<th>Short Description</th>
+				<th>Long Description</th>
 				<th>Status</th>
+				<th>Date Added</th>
+				<th>Date Modofied</th>
 				<th>Action</th>
 			</tr>
 		</thead>
@@ -20,11 +32,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</table>
 </div>
 <script>
-function fetchData() {
+$(document).ready(function(){
+	fetchData();
+});
+function fetchData(status = "") {
 	$.ajax({
-		method: "POST",
+		method: "GET",
 		url : "<?php echo base_url(); ?>api/action",
-		data: {data_action:'fetch_data'},
+		data: {data_action:'fetch_data', status: status},
 		dataType:'json',
 		success: function(data){
 			if(data.is_error == "yes") {
@@ -34,23 +49,38 @@ function fetchData() {
 				var result = (data.data);
 				var html = "";
 				for(var i = 0; i < result.length;i++) {
-					html += "<tr><td>" + parseInt(i+1) + "</td><td>" + result[i].first_name.substr(0,1).toUpperCase()+result[i].first_name.substr(1) + "</td><td>" + result[i].last_name.substr(0,1).toUpperCase()+result[i].last_name.substr(1) + "</td><td>" + result[i].email + "</td>";
+					html += "<tr><td>" + parseInt(i+1) + "</td><td>" + result[i].name.substr(0,1).toUpperCase()+result[i].name.substr(1) + "</td><td>" + result[i].short_desc + "</td><td>" + result[i].long_desc + "</td>";
 					if(result[i].status == 1) {
-						html += "<td><span class='label label-primary'>Active</span></td>";
+						html += "<td><span class='label label-primary'>In Progress</span></td>";
 					} else if(result[i].status == 2) {
+						html += "<td><span class='label label-success'>Completed</span></td>";
+					} else if(result[i].status == 0) {
 						html += "<td><span class='label label-danger'>Deleted</span></td>";
 					}
-					html += "<td><a href='<?php echo base_url(); ?>edit-user?user_id=" + result[i].id + "' class='btn btn-warning btn-sm'>Edit</a> <a href='<?php echo base_url(); ?>delete-user?user_id=" + result[i].id + "' class='btn btn-danger btn-sm'>Delete</a></td><tr>";
+					html += "<td>" + result[i].date_added + "</td>";
+					if(result[i].date_modified !== null) {
+						html += "<td>" + result[i].date_modified + "</td>";
+					} else {
+						html += "<td></td>";
+					}
+					if(result[i].status == 1) {
+						html += "<td><a href='<?php echo base_url(); ?>complete-todo?todo_id=" + result[i].id + "' class='btn btn-success btn-sm'>Mark Complete</a> <a href='<?php echo base_url(); ?>view-todo?todo_id=" + result[i].id + "' class='btn btn-info btn-sm'>View</a>  <a href='<?php echo base_url(); ?>edit-todo?todo_id=" + result[i].id + "' class='btn btn-warning btn-sm'>Edit</a> <a href='<?php echo base_url(); ?>delete-todo?todo_id=" + result[i].id + "' class='btn btn-danger btn-sm'>Delete</a></td><tr>";
+					} else {
+						html += "<td>No action required</td><tr>";
+					}
 				}
 				$('tbody').html(html);
 			}
 		},
-		error: function() {
-			alert("Some Error occured. Please try again after some time."); 
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+ 			console.log(errorThrown);
 		}
 	});
 }
-$(document).ready(function(){
-	fetchData();
+
+
+$("select[name='status']").change(function(){
+	var status = $(this).val();
+	fetchData(status);
 });
-</script>
+</script> 

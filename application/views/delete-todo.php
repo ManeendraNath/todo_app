@@ -1,25 +1,25 @@
 <div class="row">
     <div class="col-md-4 col-md-offset-4">
-        <h2 class="text-center">Update User <span class="pull-right"><a href="<?php echo base_url(); ?>">View All Employee</a></span></h3></h2>
+        <h2 class="text-center">Delete Todo <span class="pull-right"><a href="<?php echo base_url(); ?>">View Todo List</a></span></h3></h2>
         <div class="message"></div>
 		<table class="table">
 		<tbody>
 		</tbody>
 	</table>
-        <form method="post" action="" class="form-horizontal" name="deleteUser">
-            <input type="hidden" name="data_action" value="delete_user" />
-            <input type="hidden" name="user_id" value="<?php echo $_GET['user_id']; ?>" />
-            <button type="submit" class="btn btn-danger">Yes, Delete Employee</button>
+        <form method="post" action="" class="form-horizontal" name="deleteTodo">
+            <input type="hidden" name="data_action" value="delete_todo" />
+            <input type="hidden" name="todo_id" value="<?php echo $_GET['todo_id']; ?>" />
+            <button type="submit" class="btn btn-danger">Yes, Delete Todo</button>
         </form>
     </div>
 </div>
 
 <script>
-function getUserDetail(user_id) {
+function getTodoDetail(todo_id) {
 	$.ajax({
 		method: "POST",
 		url : "<?=base_url()?>api/action",
-		data: {data_action:'get_user_detail', user_id: user_id},
+		data: {data_action:'get_todo_detail', todo_id: todo_id},
 		dataType:'json',
 		success: function(data){
 			if(data.is_error == "yes") {
@@ -39,10 +39,10 @@ function getUserDetail(user_id) {
 }
 
 $(document).ready(function(){
-	getUserDetail("<?php echo $_GET['user_id']; ?>");
+	getTodoDetail("<?php echo $_GET['todo_id']; ?>");
 });
 
-$(document).on("submit", "form[name='deleteUser']", function(e){
+$(document).on("submit", "form[name='deleteTodo']", function(e){
 	e.preventDefault();
 	var data=$(this).serialize();
 	$.ajax({

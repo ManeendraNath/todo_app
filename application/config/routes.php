@@ -17,9 +17,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | so that a different class/function is called than the one
 | corresponding to the URL.
 |
-| Please see the user guide for complete details:
+| Please see the todo guide for complete details:
 |
-|	https://codeigniter.com/user_guide/general/routing.html
+|	https://codeigniter.com/todo_guide/general/routing.html
 |
 | -------------------------------------------------------------------------
 | RESERVED ROUTES
@@ -52,9 +52,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //$route['default_controller'] = 'welcome';
 $route['default_controller'] = 'index';
 $route['api/action'] = 'index/action';
-$route['new-user'] = 'index/newUser';
-$route['edit-user'] = 'index/editUser';
-$route['delete-user'] = 'index/deleteUser';
+$route['new-todo'] = 'index/newTodo';
+$route['view-todo'] = 'index/viewTodo';
+$route['complete-todo'] = 'index/completeTodo';
+$route['edit-todo'] = 'index/editTodo';
+$route['delete-todo'] = 'index/deleteTodo';
 $route['api'] = 'api/index';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

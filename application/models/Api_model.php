@@ -3,53 +3,62 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Api_model extends CI_model {
 
-    function fetchAll () {
-        $this->db->order_by('first_name');
-        $data = $this->db->get('employees');
+    function fetchAll ($status) {
+    //    die($status);
+        $this->db->select('*');
+        $this->db->from('todo');
+        if($status !== NULL) {
+            $this->db->where('status', $status );
+        }
+        $this->db->order_by('short_desc', 'ASC');
+        $data = $this->db->get();
         return $data;
     }
 
-    function getUserById($user_id) {
+    function getTodoById($todo_id) {
         $this->db->select('*');
-        $this->db->from('employees');
-        $this->db->where('id', $user_id );
+        $this->db->from('todo');
+        $this->db->where('id', $todo_id );
         $query = $this->db->get();
         if ( $query->num_rows() > 0 ) {
             $row = $query->row_array();
             return $row;
+        } else {
+            return 0;
         }
     }
 
-    function addUser($formData) {
-        $this->db->insert("employees", $formData);
-        $employee_id = $this->db->insert_id();
-        return  $employee_id;
+    function addTodo($formData) {
+        $this->db->insert("todo", $formData);
+        $todo_id = $this->db->insert_id();
+        return  $todo_id;
     }
 
-    function updateUser($formData) {
+    function updateTodo($formData) {
         extract($formData);
         $data = array(
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'email' => $email,
-            'status' => $status
+            'name' => $name,
+            'short_desc' => $short_desc,
+            'long_desc' => $long_desc
         );
         $this->db->where('id', $id);
-        $this->db->update("employees", $data);
+        $this->db->update("todo", $data);
         return true;
     }
 
-    function deleteUser($formData) {
-        extract($formData);
-        $this->db->where('id', $id);
-        $this->db->update("employees", array('status' => $status));
+    function completeTodo($todo_id) {
+        $data = array(
+            'status' => 2
+        );
+        $this->db->where('id', $todo_id);
+        $this->db->update("todo", $data);
         return true;
     }
 
-    function addTransaction($formData) {
-        $this->db->insert("transaction", $formData);
-        $employee_id = $this->db->insert_id();
-        return  $employee_id;
+    function deleteTodo($todo_id) {
+        $this->db->where('id', $todo_id);
+        $this->db->update("todo", array('status' => 0));
+        return true;
     }
 
 }
